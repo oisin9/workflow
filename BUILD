@@ -133,6 +133,24 @@ cc_library(
 	visibility = ["//visibility:public"],
 )
 cc_library(
+	name = 'postgres',
+	hdrs = [
+		'src/protocol/PostgresMessage.h',
+	],
+	includes = [
+		'src/protocol',
+		'src/server',
+	],
+	srcs = [
+		'src/factory/PostgresTaskImpl.cc',
+		'src/protocol/PostgresMessage.cc',
+	],
+	deps = [
+		':common',
+	],
+	visibility = ["//visibility:public"],
+)
+cc_library(
 	name = 'mysql',
 	hdrs = [
 		'src/client/WFMySQLConnection.h',

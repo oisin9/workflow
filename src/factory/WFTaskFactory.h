@@ -35,6 +35,7 @@
 #include "WFTask.h"
 #include "WFGraphTask.h"
 #include "EndpointParams.h"
+#include "PostgresMessage.h"
 
 // Network Client/Server tasks
 
@@ -49,6 +50,9 @@ using redis_callback_t = std::function<void (WFRedisTask *)>;
 using WFMySQLTask = WFNetworkTask<protocol::MySQLRequest,
 								  protocol::MySQLResponse>;
 using mysql_callback_t = std::function<void (WFMySQLTask *)>;
+using WFPostgresTask = WFNetworkTask<protocol::PostgresRequest,
+									 protocol::PostgresResponse>;
+using postgres_callback_t = std::function<void (WFPostgresTask *)>;
 
 using WFDnsTask = WFNetworkTask<protocol::DnsRequest,
 								protocol::DnsResponse>;
@@ -147,6 +151,14 @@ public:
 	static WFMySQLTask *create_mysql_task(const ParsedURI& uri,
 										  int retry_max,
 										  mysql_callback_t callback);
+
+	static WFPostgresTask *create_postgres_task(const ParsedURI& uri,
+												int retry_max,
+												postgres_callback_t callback);
+
+	static WFPostgresTask *create_postgres_task(const std::string& url,
+												int retry_max,
+												postgres_callback_t callback);
 
 	static WFDnsTask *create_dns_task(const std::string& url,
 									  int retry_max,
