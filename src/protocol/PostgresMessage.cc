@@ -25,5 +25,32 @@
 
 namespace protocol
 {
+PostgresMessage::~PostgresMessage()
+{}
+
+PostgresMessage::PostgresMessage(PostgresMessage&& move) :
+	ProtocolMessage(std::move(move))
+{}
+
+PostgresMessage& PostgresMessage::operator= (PostgresMessage&& move)
+{
+	ProtocolMessage::operator= (std::move(move));
+	return *this;
+}
+
+int PostgresMessage::encode(struct iovec vectors[], int max)
+{
+	// 待实现解码逻辑
+	return 1;
+}
+
+int PostgresMessage::append(const void *buf, size_t *size)
+{
+	// 待实现编码逻辑
+	return 1;
+}
+
+PostgresStartupRequest::PostgresStartupRequest()
+{}
 
 }

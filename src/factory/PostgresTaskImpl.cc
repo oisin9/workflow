@@ -37,6 +37,34 @@ protected:
 	virtual bool finish_once();
 	virtual bool init_success();
 	virtual bool check_request();
+	virtual int keep_alive_timeout();
+	virtual WFConnection *get_connection()
+	{
+		WFConnection *conn = this->WFComplexClientTask::get_connection();
+
+		if (conn)
+		{
+			void *ctx = conn->get_context();
+			if (ctx)
+				conn = (WFConnection *)ctx;	
+		}
+
+		return conn;
+	}
+
+private:
+	enum ConnState
+	{
+		ST_AUTH_REQUEST,
+		ST_USER_REQUEST
+	};
+
+	struct MyConnection : public WFConnection
+	{
+		enum ConnState state;
+		uint64_t request_id;
+		std::string cancel_key;
+	};
 
 private:
 	bool is_user_request_;
@@ -47,6 +75,8 @@ private:
 	std::string application_name_;
 	std::string client_encoding_;
 	std::string options_;
+	short state_;
+	short error_;
 };
 
 CommMessageOut *ComplexPostgresTask::message_out()
@@ -56,7 +86,25 @@ CommMessageIn *ComplexPostgresTask::message_in()
 {}
 
 bool ComplexPostgresTask::finish_once()
-{}
+{
+	if (!is_user_request_)
+	{
+		delete this->get_message_out();
+		delete this->get_message_in();
+
+		if (this->state == WFT_STATE_SUCCESS && state_ != WFT_STATE_SUCCESS)
+		{
+			this->state = state_;
+			this->error = error_;
+			this->disable_retry();
+		}
+
+		is_user_request_ = true;
+		return false;
+	}
+
+	return true;
+}
 
 bool ComplexPostgresTask::init_success()
 {
@@ -112,6 +160,12 @@ bool ComplexPostgresTask::init_success()
 bool ComplexPostgresTask::check_request()
 {
 	// TODO: 检查是否是一个合法的请求
+}
+
+int ComplexPostgresTask::keep_alive_timeout()
+{
+	// TODO: 返回keep alive的超时时间，可以在这里去把一些状态同步到Conn中
+	return 0;
 }
 
 
