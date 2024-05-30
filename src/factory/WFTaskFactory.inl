@@ -78,6 +78,7 @@ public:
 		type_ = TT_TCP;
 		ssl_ctx_ = NULL;
 		fixed_addr_ = false;
+		fixed_conn_ = false;
 		retry_max_ = retry_max;
 		retry_times_ = 0;
 		redirect_ = false;
@@ -137,8 +138,12 @@ public:
 
 	bool is_fixed_addr() const { return this->fixed_addr_; }
 
+	bool is_fixed_conn() const { return this->fixed_conn_; }
+
 protected:
 	void set_fixed_addr(int fixed) { this->fixed_addr_ = fixed; }
+
+	void set_fixed_conn(int fixed) { this->fixed_conn_ = fixed; }
 
 	void set_info(const std::string& info)
 	{
@@ -174,6 +179,7 @@ protected:
 	std::string info_;
 	SSL_CTX *ssl_ctx_;
 	bool fixed_addr_;
+	bool fixed_conn_;
 	bool redirect_;
 	CTX ctx_;
 	int retry_max_;
@@ -322,6 +328,7 @@ WFRouterTask *WFComplexClientTask<REQ, RESP, CTX>::route()
 		.info			=	info_.c_str(),
 		.ssl_ctx		=	ssl_ctx_,
 		.fixed_addr		=	fixed_addr_,
+		.fixed_conn		=	fixed_conn_,
 		.retry_times	=	retry_times_,
 		.tracing		=	&tracing_,
 	};
@@ -501,6 +508,8 @@ WFNetworkTaskFactory<REQ, RESP>::create_client_task(enum TransportType type,
 		uri.state = URI_STATE_ERROR;
 		uri.error = errno;
 	}
+	else
+		uri.state = URI_STATE_SUCCESS;
 
 	task->init(std::move(uri));
 	task->set_transport_type(type);
